@@ -596,6 +596,14 @@ class ObjectDetectionEvaluation(object):
           scores, tp_fp_labels, self.num_gt_instances_per_class[class_index])
       self.precisions_per_class.append(precision)
       self.recalls_per_class.append(recall)
+
+      # save recall precision figure
+      import matplotlib.pyplot as plt
+      plt.xlabel('recall')
+      plt.ylabel('precision')
+      plt.plot(recall, precision)
+      plt.savefig('/home/alexaway/Desktop/rp.jpg')
+
       average_precision = metrics.compute_average_precision(precision, recall)
       self.average_precision_per_class[class_index] = average_precision
 

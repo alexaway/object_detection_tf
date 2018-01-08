@@ -25,7 +25,7 @@ from nets import mobilenet_v1
 slim = tf.contrib.slim
 
 
-class EmbeddedSSDMobileNetV1FeatureExtractor(
+class EmbeddedSSDMobileNetV2FeatureExtractor(
     ssd_mobilenet_v1_feature_extractor.SSDMobileNetV1FeatureExtractor):
   """Embedded-friendly SSD Feature Extractor using MobilenetV1 features.
 
@@ -74,7 +74,7 @@ class EmbeddedSSDMobileNetV1FeatureExtractor(
       raise ValueError('Embedded-specific SSD only supports `pad_to_multiple` '
                        'of 1.')
 
-    super(EmbeddedSSDMobileNetV1FeatureExtractor, self).__init__(
+    super(EmbeddedSSDMobileNetV2FeatureExtractor, self).__init__(
         is_training, depth_multiplier, min_depth, pad_to_multiple,
         conv_hyperparams, batch_norm_trainable, reuse_weights)
 
@@ -92,15 +92,15 @@ class EmbeddedSSDMobileNetV1FeatureExtractor(
     preprocessed_inputs.get_shape().assert_has_rank(4)
     shape_assert = tf.Assert(
         tf.logical_and(
-            tf.equal(tf.shape(preprocessed_inputs)[1], 200),
-            tf.equal(tf.shape(preprocessed_inputs)[2], 200)),
-        ['image size must be 256 in both height and width.'])
+            tf.equal(tf.shape(preprocessed_inputs)[1], 256),
+            tf.equal(tf.shape(preprocessed_inputs)[2], 256)),
+        ['image size must be 224 in both height and width.'])
 
     feature_map_layout = {
         'from_layer': [
-            'Conv2d_11_pointwise', 'Conv2d_13_pointwise', '', '', ''
+            'Conv2d_9_pointwise', 'Conv2d_11_pointwise', '', '', ''
         ],
-        'layer_depth': [-1, -1, 512, 256, 256],
+        'layer_depth': [-1, -1, 512, 512, 256],
         'conv_kernel_size': [-1, -1, 3, 3, 2],
     }
 
@@ -110,7 +110,7 @@ class EmbeddedSSDMobileNetV1FeatureExtractor(
                                reuse=self._reuse_weights) as scope:
           _, image_features = mobilenet_v1.mobilenet_v1_base(
               ops.pad_to_multiple(preprocessed_inputs, self._pad_to_multiple),
-              final_endpoint='Conv2d_13_pointwise',
+              final_endpoint='Conv2d_11_pointwise',
               min_depth=self._min_depth,
               depth_multiplier=self._depth_multiplier,
               scope=scope)
